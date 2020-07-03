@@ -809,7 +809,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                         performCrop(tmpFile, destType, intent);
 						
 						//POC
-						Bundle extras = data.getExtras();
+						Bundle extras = intent.getExtras();
 						String predictedClass = (String) extras.get("predictedClass");
 						String predictedProbability = (String) extras.get("predictedProbability");
 						
