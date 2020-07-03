@@ -307,7 +307,9 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         //We can write to this URI, this will hopefully allow us to write files to get to the next step
 		
 		//POC Customize
-		intent.putExtra("codigoInstalacao", "1234567890");
+		intent.putExtra("codigoInstalacao", "poc_01234567890");
+		
+		//POC Customize End
 		
 		
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -782,6 +784,15 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                 destType = requestCode - CROP_CAMERA;
                 try {
                     processResultFromCamera(destType, intent);
+					
+					//POC Customize
+						Bundle extras = intent.getExtras();
+						String predictedClass = (String) extras.get("predictedClass");
+						String predictedProbability = (String) extras.get("predictedProbability");
+						
+						
+					//POC Customize End
+					
                 } catch (IOException e) {
                     e.printStackTrace();
                     LOG.e(LOG_TAG, "Unable to write to file");
@@ -808,11 +819,13 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                                 createCaptureFile(this.encodingType));
                         performCrop(tmpFile, destType, intent);
 						
-						//POC
+						//POC Customize
 						Bundle extras = intent.getExtras();
 						String predictedClass = (String) extras.get("predictedClass");
 						String predictedProbability = (String) extras.get("predictedProbability");
 						
+						
+						//POC Customize End
                     } else {
                         this.processResultFromCamera(destType, intent);
                     }
