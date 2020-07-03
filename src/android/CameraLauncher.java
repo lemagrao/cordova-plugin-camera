@@ -293,7 +293,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     public void takePicture(int returnType, int encodingType)
     {
         // Save the number of images currently on disk for later
-        this.numPics = queryImgDB(whichContentStore()).getCount();
+        this.numPics = queryImgDB(whichContentStore()).getCount();    
 
         // Let's use the intent and see what happens
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -305,6 +305,11 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                 photo));
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri.getCorrectUri());
         //We can write to this URI, this will hopefully allow us to write files to get to the next step
+		
+		//POC Customize
+		intent.putExtra("codigoInstalacao", "1234567890");
+		
+		
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         if (this.cordova != null) {
@@ -802,6 +807,12 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                                 applicationId + ".provider",
                                 createCaptureFile(this.encodingType));
                         performCrop(tmpFile, destType, intent);
+						
+						//POC
+						Bundle extras = data.getExtras();
+						String predictedClass = (String) extras.get("predictedClass");
+						String predictedProbability = (String) extras.get("predictedProbability");
+						
                     } else {
                         this.processResultFromCamera(destType, intent);
                     }
