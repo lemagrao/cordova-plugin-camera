@@ -289,8 +289,65 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             PermissionHelper.requestPermissions(this, TAKE_PIC_SEC, permissions);
         }
     }
+	
+	//POC Customize
+	/**
+     * Take a picture with the camera.
+     * When an image is captured or the camera view is cancelled, the result is returned
+     * in CordovaActivity.onActivityResult, which forwards the result to this.onActivityResult.
+     *
+     * The image can either be returned as a base64 string or a URI that points to the file.
+     * To display base64 string in an img tag, set the source to:
+     *      img.src="data:image/jpeg;base64,"+result;
+     * or to display URI in an img tag
+     *      img.src=result;
+     *
+     * @param returnType        Set the type of image to return.
+     * @param encodingType           Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
+     */
+    public void callTakePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor) {
+        boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                && PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
 
-    public void takePicture(int returnType, int encodingType)
+        // CB-10120: The CAMERA permission does not need to be requested unless it is declared
+        // in AndroidManifest.xml. This plugin does not declare it, but others may and so we must
+        // check the package info to determine if the permission is present.
+
+        if (!takePicturePermission) {
+            takePicturePermission = true;
+            try {
+                PackageManager packageManager = this.cordova.getActivity().getPackageManager();
+                String[] permissionsInPackage = packageManager.getPackageInfo(this.cordova.getActivity().getPackageName(), PackageManager.GET_PERMISSIONS).requestedPermissions;
+                if (permissionsInPackage != null) {
+                    for (String permission : permissionsInPackage) {
+                        if (permission.equals(Manifest.permission.CAMERA)) {
+                            takePicturePermission = false;
+                            break;
+                        }
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                // We are requesting the info for our package, so this should
+                // never be caught
+            }
+        }
+
+        if (takePicturePermission && saveAlbumPermission) {
+            takePicture(returnType, encodingType, codigoInstalacao, numeroMedidor);
+        } else if (saveAlbumPermission && !takePicturePermission) {
+            PermissionHelper.requestPermission(this, TAKE_PIC_SEC, Manifest.permission.CAMERA);
+        } else if (!saveAlbumPermission && takePicturePermission) {
+            PermissionHelper.requestPermissions(this, TAKE_PIC_SEC,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE});
+        } else {
+            PermissionHelper.requestPermissions(this, TAKE_PIC_SEC, permissions);
+        }
+    }
+	
+	
+	//POC Customize
+	public void takePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor)
     {
         // Save the number of images currently on disk for later
         this.numPics = queryImgDB(whichContentStore()).getCount();    
@@ -307,10 +364,44 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         //We can write to this URI, this will hopefully allow us to write files to get to the next step
 		
 		//POC Customize
-		intent.putExtra("codigoInstalacao", "poc_01234567890");
-		
+		intent.putExtra("codigoInstalacao", codigoInstalacao);
+		intent.putExtra("numeroMedidor", numeroMedidor);
 		//POC Customize End
 		
+		
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        if (this.cordova != null) {
+            // Let's check to make sure the camera is actually installed. (Legacy Nexus 7 code)
+            PackageManager mPm = this.cordova.getActivity().getPackageManager();
+            if(intent.resolveActivity(mPm) != null)
+            {
+                this.cordova.startActivityForResult((CordovaPlugin) this, intent, (CAMERA + 1) * 16 + returnType + 1);
+            }
+            else
+            {
+                LOG.d(LOG_TAG, "Error: You don't have a default camera.  Your device may not be CTS complaint.");
+            }
+        }
+//        else
+//            LOG.d(LOG_TAG, "ERROR: You must use the CordovaInterface for this to work correctly. Please implement it in your activity");
+    }
+
+    public void takePicture(int returnType, int encodingType)
+    {
+        // Save the number of images currently on disk for later
+        this.numPics = queryImgDB(whichContentStore()).getCount();    
+
+        // Let's use the intent and see what happens
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Specify file so that large image is captured and returned
+        File photo = createCaptureFile(encodingType);
+        this.imageUri = new CordovaUri(FileProvider.getUriForFile(cordova.getActivity(),
+                applicationId + ".provider",
+                photo));
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri.getCorrectUri());
+        //We can write to this URI, this will hopefully allow us to write files to get to the next step
 		
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
