@@ -119,6 +119,9 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     private boolean orientationCorrected;   // Has the picture's orientation been corrected
     private boolean allowEdit;              // Should we allow the user to crop the image.
 
+	private string codigoInstalacao;		//POC Customize
+	private int numeroMedidor;				//POC Customize
+
     protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
     public CallbackContext callbackContext;
@@ -168,6 +171,11 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             this.allowEdit = args.getBoolean(7);
             this.correctOrientation = args.getBoolean(8);
             this.saveToPhotoAlbum = args.getBoolean(9);
+			
+			//POC Customize
+			this.codigoInstalacao = args.getString(10);
+			this.numeroMedidor = args.getInt(11);
+			
 
             // If the user specifies a 0 or smaller width/height
             // make it -1 so later comparisons succeed
@@ -187,7 +195,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
             try {
                 if (this.srcType == CAMERA) {
-                    this.callTakePicture(destType, encodingType);
+                    //this.callTakePicture(destType, encodingType);
+					this.callTakePicture(destType, encodingType, codigoInstalacao, numeroMedidor);
                 }
                 else if ((this.srcType == PHOTOLIBRARY) || (this.srcType == SAVEDPHOTOALBUM)) {
                     // FIXME: Stop always requesting the permission
@@ -305,7 +314,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * @param returnType        Set the type of image to return.
      * @param encodingType           Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
      */
-    public void callTakePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor) {
+    public void callTakePicture(int returnType, int encodingType, String codigoInstalacao, int numeroMedidor) {
         boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 && PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
@@ -347,7 +356,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 	
 	
 	//POC Customize
-	public void takePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor)
+	public void takePicture(int returnType, int encodingType, String codigoInstalacao, int numeroMedidor)
     {
         // Save the number of images currently on disk for later
         this.numPics = queryImgDB(whichContentStore()).getCount();    
