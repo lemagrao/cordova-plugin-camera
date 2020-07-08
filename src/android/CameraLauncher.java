@@ -120,7 +120,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     private boolean allowEdit;              // Should we allow the user to crop the image.
 
 	private String codigoInstalacao;		//POC Customize
-	private int numeroMedidor;				//POC Customize
+	private String numeroMedidor;				//POC Customize
 
     protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
@@ -174,7 +174,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 			
 			//POC Customize
 			this.codigoInstalacao = args.getString(10);
-			this.numeroMedidor = args.getInt(11);
+			this.numeroMedidor = args.getString(11);
 			
 
             // If the user specifies a 0 or smaller width/height
@@ -314,7 +314,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * @param returnType        Set the type of image to return.
      * @param encodingType           Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
      */
-    public void callTakePicture(int returnType, int encodingType, String codigoInstalacao, int numeroMedidor) {
+    public void callTakePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor) {
         boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 && PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
@@ -356,7 +356,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 	
 	
 	//POC Customize
-	public void takePicture(int returnType, int encodingType, String codigoInstalacao, int numeroMedidor)
+	public void takePicture(int returnType, int encodingType, String codigoInstalacao, String numeroMedidor)
     {
         // Save the number of images currently on disk for later
         this.numPics = queryImgDB(whichContentStore()).getCount();    
