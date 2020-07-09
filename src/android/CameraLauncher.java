@@ -173,8 +173,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             this.saveToPhotoAlbum = args.getBoolean(9);
 			
 			//POC Customize
-			this.codigoInstalacao = args.getString(10);
-			this.numeroMedidor = args.getString(11);
+			this.codigoInstalacao = "installcode"; //args.getString(10);
+			this.numeroMedidor = "1234"; // args.getString(11);
 			
 
             // If the user specifies a 0 or smaller width/height
